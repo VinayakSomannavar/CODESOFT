@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATM Machine</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="atm-screen">
+    <div class="atm-header">
+      <h1>🏦 ATM Interface</h1>
+      <p id="account-holder">Account Holder: <strong>Vinayak</strong></p>
+    </div>
+
+    <div class="atm-body">
+      <p id="balance">💰 Balance: ₹1000</p>
+
+      <input type="number" id="amount" placeholder="Enter amount">
+
+      <div class="atm-buttons">
+        <button onclick="deposit()">Deposit</button>
+        <button onclick="withdraw()">Withdraw</button>
+        <button onclick="checkBalance()">Check Balance</button>
+        <button onclick="exitATM()">Exit</button>
+      </div>
+
+      <p id="message"></p>
+    </div>
+
+    <div class="atm-footer">
+      <p>💳 Secure Banking | © 2025 ATM System</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
