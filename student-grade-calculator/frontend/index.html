@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Grade Calculator with Subject Names</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .calculator-card {
+      margin-top: 40px;
+    }
+    .result-box {
+      margin-top: 20px;
+    }
+    .subject-row .btn-remove {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row justify-content-center calculator-card">
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title mb-4 text-center">Student Grade Calculator</h3>
+            <form id="gradeForm" novalidate>
+              <div class="mb-3">
+                <label for="studentName" class="form-label">Student Name</label>
+                <input type="text" id="studentName" class="form-control" placeholder="Enter student name" required>
+              </div>
+              <div id="subjectsContainer" class="mb-3">
+                <!-- Initially one subject field -->
+                <div class="row subject-row">
+                  <div class="col-5">
+                    <label class="form-label">Subject Name</label>
+                    <input type="text" class="form-control subject-name" placeholder="e.g. Maths" required>
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label">Marks (0‑100)</label>
+                    <input type="number" class="form-control subject-mark" min="0" max="100" required>
+                  </div>
+                  <div class="col-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-remove">Remove</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <button type="button" class="btn btn-outline-secondary" id="addSubjectBtn">Add Subject</button>
+              </div>
+              <div class="d-grid gap-2 d-sm-flex justify-content-sm-between">
+                <button type="submit" class="btn btn-primary">Calculate Grade</button>
+              </div>
+            </form>
+            <div id="result" class="result-box alert alert-info d-none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS + Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const subjectsContainer = document.getElementById('subjectsContainer');
+      const addSubjectBtn = document.getElementById('addSubjectBtn');
+      const form = document.getElementById('gradeForm');
+      const resultDiv = document.getElementById('result');
+
+      // Function to add a new subject row
+      function addSubjectRow() {
+        const currentCount = subjectsContainer.querySelectorAll('.subject-row').length;
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'row subject-row mb-3';
+        rowDiv.innerHTML = `
+          <div class="col-5">
+            <label class="form-label">Subject Name</label>
+            <input type="text" class="form-control subject-name" placeholder="e.g. Science" required>
+          </div>
+          <div class="col-4">
+            <label class="form-label">Marks (0‑100)</label>
+            <input type="number" class="form-control subject-mark" min="0" max="100" required>
+          </div>
+          <div class="col-3 d-flex align-items-end">
+            <button type="button" class="btn btn-danger btn-remove">Remove</button>
+          </div>
+        `;
+        subjectsContainer.appendChild(rowDiv);
+
+        // Attach event listener to the new remove button
+        const removeBtn = rowDiv.querySelector('.btn-remove');
+        removeBtn.addEventListener('click', () => {
+          removeSubjectRow(rowDiv);
+        });
+      }
+
+      // Remove a subject row, ensuring at least one is always present
+      function removeSubjectRow(rowElement) {
+        const rows = subjectsContainer.querySelectorAll('.subject-row');
+        if (rows.length > 1) {
+          rowElement.remove();
+        } else {
+          alert('At least one subject is required.');
+        }
+      }
+
+      // Setup remove on initial row
+      const initialRemoveBtn = subjectsContainer.querySelector('.btn-remove');
+      initialRemoveBtn.addEventListener('click', () => {
+        const row = initialRemoveBtn.closest('.subject-row');
+        removeSubjectRow(row);
+      });
+
+      // Add subject when button is clicked
+      addSubjectBtn.addEventListener('click', () => {
+        addSubjectRow();
+        resultDiv.classList.add('d-none');  // hide previous result
+      });
+
+      // Form submit logic
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const studentName = document.getElementById('studentName').value.trim();
+        if (!studentName) {
+          alert('Please enter the student name.');
+          return;
+        }
+
+        const nameInputs = subjectsContainer.querySelectorAll('.subject-name');
+        const markInputs = subjectsContainer.querySelectorAll('.subject-mark');
+
+        let total = 0;
+        let invalid = false;
+        let subjectDetails = [];
+
+        nameInputs.forEach((input, idx) => {
+          const subject = input.value.trim();
+          const markInput = markInputs[idx];
+          const mark = Number(markInput.value);
+          if (!subject) {
+            invalid = true;
+            subjectDetails.push({ subject, mark });  // still push to maintain alignment
+          } else {
+            subjectDetails.push({ subject, mark });
+          }
+          if (isNaN(mark) || mark < 0 || mark > 100) {
+            invalid = true;
+          } else {
+            total += mark;
+          }
+        });
+
+        if (invalid) {
+          resultDiv.textContent = 'Please enter valid subject names and marks (0‑100) for all subjects.';
+          resultDiv.className = 'alert alert-danger result-box';
+          resultDiv.classList.remove('d-none');
+          return;
+        }
+
+        const count = markInputs.length;
+        const average = total / count;
+        let grade;
+        if (average >= 90) grade = 'A';
+        else if (average >= 80) grade = 'B';
+        else if (average >= 70) grade = 'C';
+        else if (average >= 60) grade = 'D';
+        else if (average >= 50) grade = 'E';
+        else grade = 'F';
+
+        // Show the result
+        let outputHtml = `<strong>Student:</strong> ${studentName}<br>`;
+        outputHtml += `<strong>Total Marks:</strong> ${total}<br>`;
+        outputHtml += `<strong>Average Percentage:</strong> ${average.toFixed(2)}%<br>`;
+        outputHtml += `<strong>Grade:</strong> ${grade}<br>`;
+        outputHtml += `<strong>Details:</strong><br><ul>`;
+        subjectDetails.forEach(item => {
+          outputHtml += `<li>${item.subject}: ${item.mark}</li>`;
+        });
+        outputHtml += `</ul>`;
+
+        resultDiv.innerHTML = outputHtml;
+        resultDiv.className = 'alert alert-success result-box';
+        resultDiv.classList.remove('d-none');
+      });
+    });
+  </script>
+</body>
+</html>
